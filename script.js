@@ -305,26 +305,56 @@ function initBackgroundMusic() {
     if (!music || !toggle || !label) return;
 
     music.volume = 0.36;
+    music.autoplay = true;
+    music.loop = true;
 
     const updateToggle = () => {
-        const isPlaying = !music.paused && !music.ended;
+        const isPlaying = !music.paused && !music.ended && !music.muted;
         toggle.classList.toggle('is-playing', isPlaying);
         toggle.setAttribute('aria-pressed', String(isPlaying));
         label.textContent = isPlaying ? 'Tắt nhạc' : 'Bật nhạc';
     };
 
-    const tryPlay = () => {
+    const tryPlay = (withSound = true) => {
+        if (withSound) music.muted = false;
+
         const playRequest = music.play();
 
         if (playRequest && typeof playRequest.catch === 'function') {
-            playRequest.then(updateToggle).catch(updateToggle);
+            playRequest.then(() => {
+                if (withSound) music.muted = false;
+                updateToggle();
+            }).catch(() => {
+                updateToggle();
+            });
         } else {
             updateToggle();
         }
     };
 
+    const startMutedThenUnmute = () => {
+        music.muted = true;
+
+        const mutedPlayRequest = music.play();
+        const unmuteAndPlay = () => {
+            music.muted = false;
+            tryPlay(true);
+        };
+
+        if (mutedPlayRequest && typeof mutedPlayRequest.catch === 'function') {
+            mutedPlayRequest.then(() => {
+                setTimeout(unmuteAndPlay, 250);
+            }).catch(() => {
+                tryPlay(true);
+            });
+            return;
+        }
+
+        setTimeout(unmuteAndPlay, 250);
+    };
+
     toggle.addEventListener('click', () => {
-        if (music.paused) {
+        if (music.paused || music.muted) {
             tryPlay();
             return;
         }
@@ -334,13 +364,32 @@ function initBackgroundMusic() {
     });
 
     document.addEventListener('pointerdown', () => {
-        if (music.paused) tryPlay();
+        if (music.paused || music.muted) tryPlay();
     }, { once: true });
+
+    window.addEventListener('load', () => {
+        tryPlay(true);
+    }, { once: true });
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && (music.paused || music.muted)) {
+            tryPlay(true);
+        }
+    });
 
     music.addEventListener('play', updateToggle);
     music.addEventListener('pause', updateToggle);
+    music.addEventListener('volumechange', updateToggle);
+    music.addEventListener('canplay', () => {
+        if (music.paused || music.muted) tryPlay(true);
+    }, { once: true });
 
-    tryPlay();
+    startMutedThenUnmute();
+    [350, 900, 1800, 3000].forEach((delay) => {
+        setTimeout(() => {
+            if (music.paused || music.muted) tryPlay(true);
+        }, delay);
+    });
     updateToggle();
 }
 
