@@ -297,10 +297,58 @@ function initGuestName() {
     });
 }
 
+function initBackgroundMusic() {
+    const music = document.getElementById('background-music');
+    const toggle = document.querySelector('.music-toggle');
+    const label = toggle ? toggle.querySelector('.music-label') : null;
+
+    if (!music || !toggle || !label) return;
+
+    music.volume = 0.36;
+
+    const updateToggle = () => {
+        const isPlaying = !music.paused && !music.ended;
+        toggle.classList.toggle('is-playing', isPlaying);
+        toggle.setAttribute('aria-pressed', String(isPlaying));
+        label.textContent = isPlaying ? 'Tắt nhạc' : 'Bật nhạc';
+    };
+
+    const tryPlay = () => {
+        const playRequest = music.play();
+
+        if (playRequest && typeof playRequest.catch === 'function') {
+            playRequest.then(updateToggle).catch(updateToggle);
+        } else {
+            updateToggle();
+        }
+    };
+
+    toggle.addEventListener('click', () => {
+        if (music.paused) {
+            tryPlay();
+            return;
+        }
+
+        music.pause();
+        updateToggle();
+    });
+
+    document.addEventListener('pointerdown', () => {
+        if (music.paused) tryPlay();
+    }, { once: true });
+
+    music.addEventListener('play', updateToggle);
+    music.addEventListener('pause', updateToggle);
+
+    tryPlay();
+    updateToggle();
+}
+
 window.addEventListener('resize', resize);
 document.addEventListener('DOMContentLoaded', () => {
     applyInvitationData();
     initGuestName();
+    initBackgroundMusic();
     initConfetti();
     animate();
 });

@@ -11,6 +11,7 @@ const mimeTypes = {
     '.js': 'text/javascript; charset=utf-8',
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
+    '.mp3': 'audio/mpeg',
     '.png': 'image/png',
     '.webp': 'image/webp'
 };

@@ -528,6 +528,63 @@ body {
     pointer-events: none;
 }
 
+.music-toggle {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 14px;
+    border: 1px solid rgba(243, 223, 155, 0.62);
+    border-radius: 999px;
+    color: var(--ivory);
+    background: rgba(2, 8, 20, 0.76);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.music-toggle:hover,
+.music-toggle:focus-visible {
+    border-color: var(--gold-bright);
+    background: rgba(6, 23, 47, 0.92);
+    outline: none;
+}
+
+.music-symbol {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: var(--navy);
+    background: var(--gold-bright);
+    font-family: var(--font-serif);
+    font-size: 16px;
+    line-height: 1;
+}
+
+.music-toggle.is-playing .music-symbol {
+    animation: musicPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes musicPulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.12);
+    }
+}
+
 @media (min-width: 1280px) and (min-height: 760px) {
     .navy-panel {
         padding: 42px 96px 42px 64px;
@@ -798,5 +855,13 @@ body {
     .gallery-grid {
         grid-template-columns: 1fr;
         gap: 14px;
+    }
+
+    .music-toggle {
+        right: 12px;
+        bottom: 12px;
+        min-height: 38px;
+        padding: 8px 11px;
+        font-size: 12px;
     }
 }
