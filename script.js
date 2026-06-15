@@ -52,25 +52,64 @@ function getInvitations() {
         : [FALLBACK_INVITATION];
 }
 
+function matchesRouteId(item, routeId) {
+    if (!item || !routeId) return false;
+
+    const normalizedRouteId = String(routeId).toLowerCase();
+    const ids = [item.id, item.slug, ...(Array.isArray(item.aliases) ? item.aliases : [])]
+        .filter(Boolean)
+        .map((value) => String(value).toLowerCase());
+
+    return ids.includes(normalizedRouteId);
+}
+
+function getPrettyRoute(invitations) {
+    const rawSegments = decodeURIComponent(window.location.pathname)
+        .replace(/\\/g, '/')
+        .split('/')
+        .map((segment) => segment.trim())
+        .filter(Boolean);
+
+    const segments = rawSegments.filter((segment) => {
+        const lowerSegment = segment.toLowerCase();
+        return lowerSegment !== 'index.html' && !lowerSegment.includes('.');
+    });
+
+    const invitationIndex = segments.findIndex((segment) => {
+        return invitations.some((invitation) => matchesRouteId(invitation, segment));
+    });
+
+    if (invitationIndex === -1) {
+        return { invitationId: null, guestId: null };
+    }
+
+    return {
+        invitationId: segments[invitationIndex],
+        guestId: segments[invitationIndex + 1] || null
+    };
+}
+
 function getSelectedInvitation() {
     const params = new URLSearchParams(window.location.search);
-    const selectedId = params.get('id') || params.get('person') || params.get('graduate');
     const invitations = getInvitations();
+    const route = getPrettyRoute(invitations);
+    const selectedId = route.invitationId || params.get('id') || params.get('person') || params.get('graduate');
 
-    return invitations.find((item) => item.id === selectedId) || invitations[0] || FALLBACK_INVITATION;
+    return invitations.find((item) => matchesRouteId(item, selectedId)) || invitations[0] || FALLBACK_INVITATION;
 }
 
 function getSelectedGuest(invitation) {
     const params = new URLSearchParams(window.location.search);
     const directName = params.get('to') || params.get('guestName');
-    const selectedGuestId = params.get('guest') || params.get('guestId');
+    const route = getPrettyRoute(getInvitations());
+    const selectedGuestId = route.guestId || params.get('guest') || params.get('guestId');
 
     if (directName) {
         return { id: 'custom', name: directName };
     }
 
     if (Array.isArray(invitation.guests)) {
-        const guest = invitation.guests.find((item) => item.id === selectedGuestId)
+        const guest = invitation.guests.find((item) => matchesRouteId(item, selectedGuestId))
             || invitation.guests[0]
             || { id: 'khach-moi', name: DEFAULT_GUEST_NAME };
         return { ...guest, name: guest.name || guest.guestName || DEFAULT_GUEST_NAME };

@@ -37,6 +37,7 @@ window.INVITATION_DATABASE = [
             },
             {
                 id: 'dao-tuan-kiet',
+                aliases: ['tuankiet', 'tuan-kiet'],
                 name: 'ĐÀO TUẤN KIỆT'
             },
             {
