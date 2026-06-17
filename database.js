@@ -47,6 +47,18 @@ window.INVITATION_DATABASE = [
             {
                 id: 'le-thi-xuan-binh',
                 name: 'LÊ THỊ XUÂN BÌNH'
+            },
+            {
+                id: 'chi-la-nhi',
+                name: 'Chị La Nhi'
+            },
+            {
+                id: 'be-nhi',
+                name: 'Bé Nhi'
+            },
+            {
+                id: 'chi-trang',
+                name: 'Chị Trang'
             }
         ],
         gallery: [
